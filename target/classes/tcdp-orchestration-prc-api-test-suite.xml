@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+    xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+    xmlns="http://www.mulesoft.org/schema/mule/core"
+    xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+    xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+        http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+
+    <munit:config name="tcdp-orchestration-prc-api-test-suite.xml" />
+
+    <!-- TEST 1: Scheduler main flow - success with data fetch and file upload -->
+    <munit:test name="scheduler-tcdp-orchestration-main-flow-success-test"
+        doc:id="c33f8613-e81d-4e35-bc46-21d0a47f7f4f"
+        description="Scheduler orchestration flow should fetch TCDP data and upload file successfully">
+
+        <munit:behavior>
+
+            <!-- Mock HTTP Request 1: Fetch TCDP report data → returns array of records -->
+            <munit-tools:mock-when doc:name="Mock http:request - fetch TCDP data"
+                doc:id="38c2d5f4-44e2-453b-a3db-95fefb0a9c16"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="doc:id"
+                        whereValue="3b0ebc5e-76bb-4ecf-aafd-81cd67a05855" />
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload mediaType="application/json"
+                        value='#[output application/json
+---
+readUrl("classpath://test-inputs/http-response.json")]' />
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock HTTP Request 2: Upload file → returns success status -->
+            <!-- ⚠️ Replace the whereValue below with the actual doc:id of
+                 your second http:request processor from the implementation XML -->
+            <munit-tools:mock-when doc:name="Mock http:request - upload file"
+                doc:id="485d27b0-205b-4de5-9ea7-0004cb681b92"
+                processor="http:request">
+                <munit-tools:then-return>
+                    <munit-tools:payload mediaType="application/java"
+                        value='#[%dw 2.0
+output application/java
+---
+{
+    "status": "success",
+    "message": "File uploaded successfully"
+}]' />
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+        </munit:behavior>
+
+        <munit:execution>
+            <munit:set-event doc:name="Set Event - scheduler trigger"
+                doc:id="ecfc341b-0aae-40b0-b8e7-17b5f3901f1b">
+                <munit:payload value="#[null]" mediaType="application/java" />
+            </munit:set-event>
+            <flow-ref doc:name="Flow-ref to scheduler-tcdp-orchestration-main-flow"
+                doc:id="b4dadc88-4756-47af-abc2-ad7217eeac1e"
+                name="scheduler-tcdp-orchestration-main-flow" />
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that doc:name="Assert upload response status is success"
+                doc:id="59fa21dd-96d9-49cb-958c-6580dbdae6ef"
+                expression="#[payload.status]"
+                is="#[MunitTools::equalTo('success')]"
+                message="Upload response status should be success" />
+        </munit:validation>
+
+    </munit:test>
+    <!-- TEST: Default branch - No TCDP data found (empty payload) -->
+<munit:test name="scheduler-tcdp-orchestration-no-data-default-branch-test"
+    doc:id="66e6c00f-5384-49e7-beab-3d601f66cef3"
+    description="Scheduler orchestration flow should log No Data when http:request returns empty array">
+
+    <munit:behavior>
+
+        <!-- Mock http:request to return empty array → isEmpty(payload) = true → default branch executes -->
+        <munit-tools:mock-when doc:name="Mock http:request - fetch TCDP returns empty"
+            doc:id="2a2b1e94-c29d-4839-8b25-8a6a33c0fd69"
+            processor="http:request">
+            <munit-tools:with-attributes>
+                <munit-tools:with-attribute attributeName="doc:id"
+                    whereValue="3b0ebc5e-76bb-4ecf-aafd-81cd67a05855" />
+            </munit-tools:with-attributes>
+            <munit-tools:then-return>
+                <munit-tools:payload mediaType="application/java"
+                    value="#[[] as Array]" />
+            </munit-tools:then-return>
+        </munit-tools:mock-when>
+
+    </munit:behavior>
+
+    <munit:execution>
+        <flow-ref doc:name="Flow-ref to scheduler-tcdp-orchestration-main-flow"
+            doc:id="c6c6ae01-e8dd-4aae-af6c-c62ddd692f96"
+            name="scheduler-tcdp-orchestration-main-flow" />
+    </munit:execution>
+
+    <munit:validation>
+        <munit-tools:assert-that doc:name="Assert payload is not null after default branch"
+            doc:id="abc2fab3-1da1-41ef-b560-14272dcb16b1"
+            expression="#[payload]"
+            is="#[MunitTools::notNullValue()]"
+            message="Payload should not be null after No Data branch executes" />
+    </munit:validation>
+
+</munit:test>
+
+</mule>

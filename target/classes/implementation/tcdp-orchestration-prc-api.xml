@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	
+	<flow name="scheduler-tcdp-orchestration-main-flow" doc:id="277176d5-18d6-4fe1-8c76-f0a39d4861eb" >
+		<scheduler doc:name="Job run every one hour" doc:id="4bbb7233-294d-4d95-959d-8aa0d6d91838" >
+			<scheduling-strategy >
+				<cron expression="${scheduler.frequency}" />
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="Start Main Log" doc:id="66a88474-ae4b-45c1-83c4-6d6867690123" message='#[output application/json&#10;---&#10;{&#10;	"flowName": "scheduler-tcdp-orchestration-main-flow started",&#10;	"tracePoint": "START",&#10;	"timestamp": now()&#10;}]'/>
+		<try doc:name="Try" doc:id="265f6fd6-bb1e-48f7-9f5b-7e666ca7ff40">
+			<os:retrieve doc:name="Retrieve" doc:id="bae6c1f0-57c3-4253-9258-9e1c5240af11" key="lastProcessedTimeStamp" objectStore="Watermark_Object_Store" target="lastProcessedTimeStamp" >
+			</os:retrieve>
+			<error-handler>
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a30c3699-be7e-4acf-a588-36ddb68b1c93">
+					<set-variable value="#[null]" doc:name="Set Variable" doc:id="fa86648f-903f-4991-8cc4-7c1fd2f40288" variableName="lastProcessedTimeStamp" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<ee:transform doc:name="TCDP Details" doc:id="129c8821-de85-4ac5-9895-9c0122cd78ff">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="query" ><![CDATA[%dw 2.0
+output application/json
+---
+if (vars.lastProcessedTimeStamp == null)
+    "SELECT
+        u.id AS \"user_id\",
+        jr.id AS job_role_id,
+        u.created_at
+    FROM public.\"user\" u
+    JOIN public.job_role jr
+        ON jr.id = u.job_role_id
+    WHERE u.created_at >= NOW() - INTERVAL '100 days'
+    ORDER BY u.created_at DESC"
+else
+    "SELECT
+        u.id AS \"user_id\",
+        jr.id AS job_role_id,
+        u.created_at
+    FROM public.\"user\" u
+    JOIN public.job_role jr
+        ON jr.id = u.job_role_id
+    WHERE u.created_at > " ++ vars.lastProcessedTimeStamp ++ "
+    ORDER BY u.created_at DESC"]]></ee:set-variable>
+				<ee:set-variable variableName="httpDetails" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"host": Mule::p('lms-tcdp.host'),
+	"port": Mule::p('lms-tcdp.port'),
+	"basePath": Mule::p('lms-tcdp.basePath'),
+	"path": Mule::p('lms-tcdp.path'),
+	"method": Mule::p('lms-tcdp.method'),
+	"clientId": Mule::p('lms-tcdp.clientId'),
+	"clientSecret": Mule::p('secure::lms-tcdp.clientSecret'),
+	"query": vars.query,
+	"protocol" :  Mule::p('lms-tcdp.protocol')
+	
+}]]></ee:set-variable>
+				<ee:set-variable variableName="reportname" ><![CDATA["tcdp"]]></ee:set-variable>
+			
+</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="common-http-request-flow" doc:id="4127c36f-3a7f-4378-876a-a76f21cedd46" name="common-http-request-flow"/>
+		<choice doc:name="Check if TCDP Data Exists" doc:id="5d0425f1-8404-4f79-95a6-53bd3c5163a4" >
+			<when expression="#[!isEmpty(payload)]">
+				<ee:transform doc:name="Databricks TCDP HTTP Details" doc:id="c5e63fd1-d97c-42bc-b1aa-387588abd3a7">
+					<ee:message />
+					<ee:variables>
+						<ee:set-variable variableName="httpDetails"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"host": Mule::p('databricks-employee.host'),
+	"port": Mule::p('databricks-employee.port'),
+	"basePath": Mule::p('databricks-employee.basePath'),
+	"path": Mule::p('databricks-employee.path'),
+	"method": Mule::p('databricks-employee.method'),
+	"clientId": Mule::p('databricks-employee.clientId'),
+	"clientSecret": Mule::p('secure::databricks-employee.clientSecret')
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="common-http-request-flow" doc:id="f3fdc936-c2f1-4a71-a551-6d300b23bbf8" name="common-http-request-flow"/>
+				<os:store doc:name="Update Watermark After Successful Processing" doc:id="c925232d-2738-459b-9cdd-d3371218cdd3" key="lastProcessedTimeStamp" objectStore="Watermark_Object_Store">
+					<os:value><![CDATA[#["'"++(now() as DateTime as String {format:"yyyy-MM-dd HH:mm:ss"})++ "'"]]]></os:value>
+				</os:store>
+				<logger level="INFO" doc:name="End Main Log" doc:id="813a9cac-639e-46ad-8f73-445707cd3f39" message='#[output application/json&#10;---&#10;{&#10;	"flowName": "scheduler-tcdp-orchestration-main-flow End",&#10;	"status": "Processed successfully..",&#10;	"tracePoint": "END",&#10;	"timestamp": now()&#10;}]' />
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Log No Data Found" doc:id="a9a374b2-f9d2-42d0-866f-1a33685f4b62" message='#[output application/json&#10;---&#10;{&#10;	"flowName": "scheduler-scdp-orchestration-main-flow End",&#10;	"status": "No Data",&#10;	"tracePoint": "ERROR",&#10;	"timestamp": now()&#10;}]'/>
+			</otherwise>
+		</choice>
+		<error-handler ref="global-error-handler" />
+	</flow>
+</mule>

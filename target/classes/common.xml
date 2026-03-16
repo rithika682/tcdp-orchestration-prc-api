@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	<sub-flow name="common-http-request-flow" doc:id="bd54842a-95c3-405d-aa4e-c99ad3ba5889" >
+		<logger level="INFO" doc:name="Before HTTP Request Log" doc:id="f21979bc-fdef-49bd-9983-0837fa571631" message='#[output application/json&#10;---&#10;{&#10;	"flowName": "scheduler-tcdp-orchestration-main-flow",&#10;	"tracePoint": "BEFORE REQUEST",&#10;	"contentSize": sizeOf(payload) default 0&#10;}]'/>
+		<http:request method="#[vars.httpDetails.method]" doc:name="HTTP Request to External System" doc:id="3b0ebc5e-76bb-4ecf-aafd-81cd67a05855" responseTimeout="${http.timeout}" config-ref="HTTP_Request_configuration" path="#[vars.httpDetails.path]">
+			<http:headers ><![CDATA[#[{
+	"client_id": vars.httpDetails.clientId,
+	"client_secret": vars.httpDetails.clientSecret,
+	"Content-Type": "application/json"
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[%dw 2.0
+output application/json
+---
+{
+    "query": vars.query default "",
+    "reportName" : vars.reportname default ""
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="After HTTP Request Log" doc:id="3db924b8-1bd4-4828-a003-cc4badd6e05d" message='#[output application/json&#10;---&#10;{&#10;	"flowName": "scheduler-scdp-orchestration-main-flow",&#10;	"tracePoint": "AFTER REQUEST",&#10;	"statusCode": attributes.statusCode default "",&#10;	"contentSize": sizeOf(payload) default 0&#10;}]'/>
+	</sub-flow>
+	
+</mule>

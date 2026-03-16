@@ -1,0 +1,25 @@
+scheduler:
+  frequency: "0 0 0/1 * * ?" 
+
+lms-tcdp:
+  host : "lms-tcdp-sys-app-plkk5q.m98vj.sgp-s1.cloudhub.io"
+  port: "443"
+  #host: "localhost"
+  #port: "8085"
+  clientId: "7cda3089a66e4d9fae77882f753e1266"
+  basePath: "/api"
+  path: "/tcdp"
+  method: "GET"
+
+databricks-employee:
+  host: "databricks-reports-sys-app-plkk5q.m98vj.sgp-s1.cloudhub.io"
+  port: "443"
+  #host: "localhost"
+  #port: "8082"
+  clientId: "877fce5e6eef4451a1b93f23565f5a4c"
+  basePath: "/api"
+  path: "/upload"
+  method: "POST"
+
+
+
