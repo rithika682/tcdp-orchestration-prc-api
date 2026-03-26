@@ -1,0 +1,42 @@
+{
+  "configs": [
+    "global-config.xml",
+    "global-error-hadler.xml",
+    "implementation/tcdp-orchestration-prc-api.xml",
+    "common.xml"
+  ],
+  "secureProperties": [],
+  "supportedJavaVersions": [],
+  "redeploymentEnabled": true,
+  "name": "com.mycompany:tcdp-orchestration-prc-api:1.0.0-SNAPSHOT",
+  "minMuleVersion": "4.10.0",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedPackages": [],
+      "exportedResources": [
+        "application-types.xml",
+        "common.xml",
+        "config/api-common-config.yaml",
+        "config/api-dev-config.yaml",
+        "config/api-prod-config.yaml",
+        "config/api-qa-config.yaml",
+        "config/vault/api-dev-config.yaml",
+        "config/vault/api-prod-config.yaml",
+        "config/vault/api-qa-config.yaml",
+        "global-config.xml",
+        "global-error-hadler.xml",
+        "implementation/tcdp-orchestration-prc-api.xml",
+        "log4j2.xml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  },
+  "javaSpecificationVersions": [
+    "17"
+  ]
+}

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+	<error-handler name="global-error-handler" 
+	               doc:id="e7396aed-b762-4318-a144-df2b1b9001c1" 
+	               doc:name="Global Error Handler">
+		
+		<!-- HTTP Connectivity Errors -->
+		<on-error-continue enableNotifications="true" 
+		                  logException="true" 
+		                  doc:name="HTTP Connectivity Error" 
+		                  type="HTTP:CONNECTIVITY">
+			<logger level="ERROR" 
+			        doc:name="Log HTTP Connectivity Error" 
+			        message='#["HTTP Connectivity Error: " ++ error.description ++ " | Detail: " ++ error.detailedDescription]'/>
+			<ee:transform doc:name="Error Response">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"error": "HTTP Connectivity Error",
+	"message": error.description,
+	"timestamp": now()
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-continue>
+		
+		<!-- HTTP Timeout Errors -->
+		<on-error-continue enableNotifications="true" 
+		                  logException="true" 
+		                  doc:name="HTTP Timeout Error" 
+		                  type="HTTP:TIMEOUT">
+			<logger level="ERROR" 
+			        doc:name="Log HTTP Timeout Error" 
+			        message='#["HTTP Timeout Error: " ++ error.description]'/>
+			<ee:transform doc:name="Error Response">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"error": "HTTP Timeout",
+	"message": "Request timed out",
+	"timestamp": now()
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-continue>
+		
+		<!-- HTTP Client Errors (4xx) -->
+		<on-error-continue enableNotifications="true" 
+		                  logException="true" 
+		                  doc:name="HTTP Client Error" 
+		                  type="HTTP:BAD_REQUEST, HTTP:UNAUTHORIZED, HTTP:FORBIDDEN, HTTP:NOT_FOUND">
+			<logger level="ERROR" 
+			        doc:name="Log HTTP Client Error" 
+			        message='#["HTTP Client Error: " ++ error.description]'/>
+			<ee:transform doc:name="Error Response">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"error": "HTTP Client Error",
+	"message": error.description,
+	"timestamp": now()
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-continue>
+		
+		<!-- HTTP Server Errors (5xx) -->
+		<on-error-continue enableNotifications="true" 
+		                  logException="true" 
+		                  doc:name="HTTP Server Error" 
+		                  type="HTTP:INTERNAL_SERVER_ERROR, HTTP:SERVICE_UNAVAILABLE">
+			<logger level="ERROR" 
+			        doc:name="Log HTTP Server Error" 
+			        message='#["HTTP Server Error: " ++ error.description]'/>
+			<ee:transform doc:name="Error Response">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"error": "HTTP Server Error",
+	"message": "External service error",
+	"timestamp": now()
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-continue>
+		
+		<!-- Object Store Errors -->
+		<on-error-continue enableNotifications="true" 
+		                  logException="true" 
+		                  doc:name="Object Store Error" 
+		                  type="OS:INVALID_KEY, OS:KEY_NOT_FOUND, OS:STORE_NOT_AVAILABLE">
+			<logger level="ERROR" 
+			        doc:name="Log Object Store Error" 
+			        message='#["Object Store Error: " ++ error.description]'/>
+		</on-error-continue>
+		
+		<!-- Any Other Error -->
+		<on-error-continue enableNotifications="true" 
+		                  logException="true" 
+		                  doc:name="Generic Error Handler" 
+		                  type="ANY">
+			<logger level="ERROR" 
+			        doc:name="Log Generic Error" 
+			        message='#["Unexpected Error: " ++ error.description ++ " | Type: " ++ error.errorType.identifier]'/>
+			<ee:transform doc:name="Error Response">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"error": "Internal Error",
+	"message": error.description,
+	"errorType": error.errorType.identifier,
+	"timestamp": now()
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-continue>
+	</error-handler>
+</mule>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="cb966a48-d702-411a-9c2b-b50705197100" basePath="#[vars.httpDetails.basePath]">
+		<http:request-connection host="#[vars.httpDetails.host]" port="#[vars.httpDetails.port]" protocol="HTTPS"/>
+	</http:request-config>
+	<os:object-store name="Watermark_Object_Store" doc:name="Object store" doc:id="f7bf186f-a7c2-4b5b-afe0-de0c789a8c58" maxEntries="${os.maxentries}" entryTtl="${os.entryttl}" expirationInterval="${os.expirationinterval}"/>
+	<configuration-properties doc:name="Configuration properties" doc:id="f18aad32-605c-4c35-b553-d07b40cb7375" file="config\api-${env}-config.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="88002e34-25b5-4f62-9be0-ab17b1bce07d" file="config\api-common-config.yaml" />
+	<configuration doc:name="Configuration" doc:id="e1dee1c5-6c2e-4b03-9ddb-de2c595c1909" defaultErrorHandler-ref="global-error-handler" />
+	<configuration-properties doc:name="Configuration properties" doc:id="cedf309b-d058-465d-8110-07097ca66df4" file="config\vault\api-${env}-config.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="8f314fa6-1534-4b4a-83e3-d15f61841a4c" file="config\vault\api-${env}-config.yaml" key="${secret.key}"/>
+	
+</mule>
