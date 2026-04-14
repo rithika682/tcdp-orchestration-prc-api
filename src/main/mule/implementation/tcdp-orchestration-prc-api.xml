@@ -9,7 +9,7 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 	<flow name="scheduler-tcdp-orchestration-main-flow" doc:id="277176d5-18d6-4fe1-8c76-f0a39d4861eb" >
 		<scheduler doc:name="Job run every one hour" doc:id="4bbb7233-294d-4d95-959d-8aa0d6d91838" >
 			<scheduling-strategy >
-				<cron expression="${scheduler.frequency}" />
+				<cron expression="${scheduler.frequency}" timeZone="${scheduler.timezone}"/>
 			</scheduling-strategy>
 		</scheduler>
 		<logger level="INFO" doc:name="Start Main Log" doc:id="66a88474-ae4b-45c1-83c4-6d6867690123" message='#[output application/json&#10;---&#10;{&#10;	"flowName": "scheduler-tcdp-orchestration-main-flow started",&#10;	"tracePoint": "START",&#10;	"timestamp": now()&#10;}]'/>
@@ -47,7 +47,7 @@ else
     FROM public.\"user\" u
     JOIN public.job_role jr
         ON jr.id = u.job_role_id
-    WHERE u.updated_at > '" ++ vars.lastProcessedTimeStamp ++ "'
+    WHERE u.updated_at > " ++ vars.lastProcessedTimeStamp ++ "
     ORDER BY u.updated_at DESC"]]></ee:set-variable>
 				<ee:set-variable variableName="httpDetails" ><![CDATA[%dw 2.0
 output application/json
@@ -95,7 +95,7 @@ output application/json
 				<logger level="INFO" doc:name="End Main Log" doc:id="813a9cac-639e-46ad-8f73-445707cd3f39" message='#[output application/json&#10;---&#10;{&#10;	"flowName": "scheduler-tcdp-orchestration-main-flow End",&#10;	"status": "Processed successfully....",&#10;	"tracePoint": "END",&#10;	"timestamp": now()&#10;}]' />
 			</when>
 			<otherwise >
-				<logger level="INFO" doc:name="Log No Data Found" doc:id="a9a374b2-f9d2-42d0-866f-1a33685f4b62" message='#[output application/json&#10;---&#10;{&#10;	"flowName": "scheduler-tcdp-orchestration-main-flow End",&#10;	"status": "No Data",&#10;	"tracePoint": "ERROR",&#10;	"timestamp": now()&#10;}]'/>
+				<logger level="INFO" doc:name="Log No Data Found" doc:id="a9a374b2-f9d2-42d0-866f-1a33685f4b62" message='#[output application/json&#10;---&#10;{&#10;	"flowName": "scheduler-tcdp-orchestration-main-flow End",&#10;	"status": "No Data",&#10;	"tracePoint": "End",&#10;	"timestamp": now()&#10;}]'/>
 			</otherwise>
 		</choice>
 		<error-handler ref="global-error-handler" />

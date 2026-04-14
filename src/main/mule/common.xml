@@ -22,7 +22,7 @@ output application/json
     "reportName" : vars.reportname default ""
 }]]]></http:query-params>
 		</http:request>
-		<logger level="INFO" doc:name="After HTTP Request Log" doc:id="3db924b8-1bd4-4828-a003-cc4badd6e05d" message='#[output application/json&#10;---&#10;{&#10;	"flowName": "scheduler-scdp-orchestration-main-flow",&#10;	"tracePoint": "AFTER REQUEST",&#10;	"statusCode": attributes.statusCode default "",&#10;	"contentSize": sizeOf(payload) default 0&#10;}]'/>
+		<logger level="INFO" doc:name="After HTTP Request Log" doc:id="3db924b8-1bd4-4828-a003-cc4badd6e05d" message='#[output application/json&#10;---&#10;{&#10;	"flowName": "scheduler-tcdp-orchestration-main-flow",&#10;	"tracePoint": "AFTER REQUEST",&#10;	"statusCode": attributes.statusCode default "",&#10;	"contentSize": sizeOf(payload) default 0&#10;}]'/>
 	</sub-flow>
 	
 </mule>

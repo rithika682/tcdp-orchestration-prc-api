@@ -1,5 +1,7 @@
 scheduler:
-  frequency: "0 0 0/1 * * ?" 
+  frequency: "0 0 0/1 1/1 * ? *"
+  startdelay: "0"
+  timezone: "IST"
 
 lms-tcdp:
   host : "lms-tcdp-sys-app-plkk5q.m98vj.sgp-s1.cloudhub.io"

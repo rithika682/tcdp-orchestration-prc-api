@@ -1,22 +1,20 @@
 scheduler:
-  frequency: "0 0 0/1 * * ?" 
+  frequency: "0 0 0/1 1/1 * ? *"
+  startdelay: "0"
+  timezone: "IST"
 
 lms-tcdp:
-  host : "lms-tcdp-sys-app-plkk5q.m98vj.sgp-s1.cloudhub.io"
+  host : "lms-tcdp-sys-app-ggc1em.smgn5c.sgp-s1.cloudhub.io"
   port: "443"
-  #host: "localhost"
-  #port: "8085"
   clientId: "7cda3089a66e4d9fae77882f753e1266"
   basePath: "/api"
   path: "/tcdp"
   method: "GET"
 
 databricks-employee:
-  host: "databricks-reports-sys-app-plkk5q.m98vj.sgp-s1.cloudhub.io"
+  host: "databricks-all-reports-sys-api-ggc1em.smgn5c.sgp-s1.cloudhub.io"
   port: "443"
-  #host: "localhost"
-  #port: "8082"
-  clientId: "877fce5e6eef4451a1b93f23565f5a4c"
+  clientId: "50474bee93a2489b9c641bfa6b161f37"
   basePath: "/api"
   path: "/upload"
   method: "POST"

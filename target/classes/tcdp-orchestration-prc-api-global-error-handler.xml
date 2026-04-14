@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+    xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+    xmlns="http://www.mulesoft.org/schema/mule/core"
+    xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+    xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+        http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+
+    <munit:config name="new-test-suite.xml" />
+
+    <!-- TEST 1: HTTP:CONNECTIVITY error is handled by global error handler -->
+    <munit:test name="scheduler-tcdp-orchestration-http-connectivity-error-test"
+        doc:id="6b9c4380-d0b5-4445-84cd-6fa211fc7b34"
+        description="Global error handler should handle HTTP:CONNECTIVITY error from http:request"
+        expectedErrorType="HTTP:CONNECTIVITY">
+
+        <munit:behavior>
+            <munit-tools:mock-when doc:name="Mock http:request - throw HTTP:CONNECTIVITY"
+                doc:id="66012e2f-17b8-4026-b620-8d6dd8fe5c41"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="doc:id"
+                        whereValue="3b0ebc5e-76bb-4ecf-aafd-81cd67a05855" />
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[output application/json
+---
+readUrl("classpath://test-inputs/http-response.json")]' />
+                    <munit-tools:error typeId="HTTP:CONNECTIVITY" />
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref doc:name="Flow-ref to scheduler-tcdp-orchestration-main-flow"
+                doc:id="3e315a6b-5f20-42cb-acfe-88d517afed6c"
+                name="scheduler-tcdp-orchestration-main-flow" />
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that doc:name="Assert error response payload is not null"
+                doc:id="4965764b-947b-4b19-99b1-bd385c47d4a7"
+                is="#[MunitTools::notNullValue()]"
+                expression="#[%dw 2.0
+import * from dw::test::Asserts
+---
+payload must beObject()]" />
+        </munit:validation>
+
+    </munit:test>
+
+    <!-- TEST 2: HTTP:TIMEOUT error is handled by global error handler -->
+    <munit:test name="scheduler-tcdp-orchestration-http-timeout-error-test"
+        doc:id="d6a53b63-e1dd-4b37-bc2d-a8df8c33dcc4"
+        description="Global error handler should handle HTTP:TIMEOUT error from http:request"
+        expectedErrorType="HTTP:TIMEOUT">
+
+        <munit:behavior>
+            <munit-tools:mock-when doc:name="Mock http:request - throw HTTP:TIMEOUT"
+                doc:id="5a87b5c3-3c72-4a1f-9718-a6687c8be611"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="doc:id"
+                        whereValue="3b0ebc5e-76bb-4ecf-aafd-81cd67a05855" />
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[output application/json
+---
+readUrl("classpath://test-inputs/http-response.json")]' />
+                    <munit-tools:error typeId="HTTP:TIMEOUT" />
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref doc:name="Flow-ref to scheduler-tcdp-orchestration-main-flow"
+                doc:id="83602e31-1e86-4e3a-82b9-15565a88c495"
+                name="scheduler-tcdp-orchestration-main-flow" />
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that doc:name="Assert error response payload is not null"
+                doc:id="90b40930-ba84-4bb2-8f9a-4c523b1a8eec"
+                is="#[MunitTools::notNullValue()]"
+                expression="#[%dw 2.0
+import * from dw::test::Asserts
+---
+payload must beObject()]" />
+        </munit:validation>
+
+    </munit:test>
+
+    <!-- TEST 3: HTTP:BAD_REQUEST error is handled by global error handler -->
+    <munit:test name="scheduler-tcdp-orchestration-http-bad-request-error-test"
+        doc:id="5883006a-fcb2-4421-9307-03fe93b58a96"
+        description="Global error handler should handle HTTP:BAD_REQUEST error from http:request"
+        expectedErrorType="HTTP:BAD_REQUEST">
+
+        <munit:behavior>
+            <munit-tools:mock-when doc:name="Mock http:request - throw HTTP:BAD_REQUEST"
+                doc:id="1cf7ce29-db05-469e-a539-9ba2c217937a"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="doc:id"
+                        whereValue="3b0ebc5e-76bb-4ecf-aafd-81cd67a05855" />
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[output application/json
+---
+readUrl("classpath://test-inputs/http-response.json")]' />
+                    <munit-tools:error typeId="HTTP:BAD_REQUEST" />
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref doc:name="Flow-ref to scheduler-tcdp-orchestration-main-flow"
+                doc:id="6d75d383-53b7-40f2-8d09-275640008011"
+                name="scheduler-tcdp-orchestration-main-flow" />
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that doc:name="Assert error response payload is not null"
+                doc:id="02b60000-4fe9-4682-866c-587a79ed4393"
+                is="#[MunitTools::notNullValue()]"
+                expression="#[%dw 2.0
+import * from dw::test::Asserts
+---
+payload must beObject()]" />
+        </munit:validation>
+
+    </munit:test>
+
+    <!-- TEST 4: HTTP:INTERNAL_SERVER_ERROR is handled by global error handler -->
+    <munit:test name="scheduler-tcdp-orchestration-http-internal-server-error-test"
+        doc:id="13611944-44cc-4790-9389-593c1f6d90fd"
+        description="Global error handler should handle HTTP:INTERNAL_SERVER_ERROR from http:request"
+        expectedErrorType="HTTP:INTERNAL_SERVER_ERROR">
+
+        <munit:behavior>
+            <munit-tools:mock-when doc:name="Mock http:request - throw HTTP:INTERNAL_SERVER_ERROR"
+                doc:id="d9fd7c82-6860-408a-a0db-529fdd4e8940"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="doc:id"
+                        whereValue="3b0ebc5e-76bb-4ecf-aafd-81cd67a05855" />
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[output application/json
+---
+readUrl("classpath://test-inputs/http-response.json")]' />
+                    <munit-tools:error typeId="HTTP:INTERNAL_SERVER_ERROR" />
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref doc:name="Flow-ref to scheduler-tcdp-orchestration-main-flow"
+                doc:id="da43531e-9752-47e4-9a9e-ad3f8d050114"
+                name="scheduler-tcdp-orchestration-main-flow" />
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that doc:name="Assert error response payload is not null"
+                doc:id="f2320af7-3d74-437e-9192-a65a18aa7d61"
+                is="#[MunitTools::notNullValue()]"
+                expression="#[%dw 2.0
+import * from dw::test::Asserts
+---
+payload must beObject()]" />
+        </munit:validation>
+
+    </munit:test>
+
+    <!-- TEST 5: OS:INVALID_KEY error is handled by global error handler -->
+    <munit:test name="scheduler-tcdp-orchestration-os-invalid-key-error-test"
+        doc:id="2dd9250b-0085-44e5-803d-297e0d061736"
+        description="Global error handler should handle OS:INVALID_KEY error from object store"
+        expectedErrorType="OS:INVALID_KEY">
+
+        <munit:behavior>
+            <munit-tools:mock-when doc:name="Mock http:request - throw OS:INVALID_KEY"
+                doc:id="914b35bc-fa95-4c2f-96a7-567a39ba1f98"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="doc:id"
+                        whereValue="3b0ebc5e-76bb-4ecf-aafd-81cd67a05855" />
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[output application/json
+---
+readUrl("classpath://test-inputs/http-response.json")]' />
+                    <munit-tools:error typeId="OS:INVALID_KEY" />
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref doc:name="Flow-ref to scheduler-tcdp-orchestration-main-flow"
+                doc:id="75137c70-e0ce-4bde-928c-52f70a6925ac"
+                name="scheduler-tcdp-orchestration-main-flow" />
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that doc:name="Assert error response payload is not null"
+                doc:id="25e90eb9-6d89-4347-8e61-210a31fe5cd6"
+                is="#[MunitTools::notNullValue()]"
+                expression="#[%dw 2.0
+import * from dw::test::Asserts
+---
+payload must beObject()]" />
+        </munit:validation>
+
+    </munit:test>
+
+    <!-- TEST 6: ANY (unexpected) error is handled by global error handler -->
+    <munit:test name="scheduler-tcdp-orchestration-any-unexpected-error-test"
+        doc:id="19a37c0b-1640-4fa2-9ad4-d71cd3e76f6c"
+        description="Global error handler should handle any unexpected error from http:request"
+        expectedErrorType="ANY">
+
+        <munit:behavior>
+            <munit-tools:mock-when doc:name="Mock http:request - throw ANY unexpected error"
+                doc:id="acbaa82b-04e4-44dd-b5de-0a69353b73c2"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="doc:id"
+                        whereValue="3b0ebc5e-76bb-4ecf-aafd-81cd67a05855" />
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[output application/json
+---
+readUrl("classpath://test-inputs/http-response.json")]' />
+                    <munit-tools:error typeId="ANY" />
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref doc:name="Flow-ref to scheduler-tcdp-orchestration-main-flow"
+                doc:id="8f1e8e4c-5fc2-4635-ba44-44478c98d782"
+                name="scheduler-tcdp-orchestration-main-flow" />
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that doc:name="Assert error response payload is not null"
+                doc:id="39120efb-25c1-45c9-942d-baa1946032d2"
+                is="#[MunitTools::notNullValue()]"
+                expression="#[%dw 2.0
+import * from dw::test::Asserts
+---
+payload must beObject()]" />
+        </munit:validation>
+
+    </munit:test>
+
+</mule>
